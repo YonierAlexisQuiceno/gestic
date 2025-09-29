@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "nombre": "Mesa de ayuda TI",
+    "categoria": "Soporte",
+    "nivel": "Plata",
+    "responsable": "TI",
+    "descripcion": "Atención de incidencias y requerimientos básicos.",
+    "ans": "Respuesta 4h, resolución 24h",
+    "estado": "Activo"
+  },
+  {
+    "id": 2,
+    "nombre": "Gestión de cuentas",
+    "categoria": "Identidad",
+    "nivel": "Bronce",
+    "responsable": "Seguridad",
+    "descripcion": "Altas, bajas y cambios de usuarios.",
+    "ans": "48h",
+    "estado": "Activo"
+  }
+]
