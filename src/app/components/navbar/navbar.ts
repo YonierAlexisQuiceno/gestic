@@ -18,6 +18,7 @@ import { Auth } from '../../core/services/auth';
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item"><a routerLink="/" routerLinkActive="active" class="nav-link">Catálogo</a></li>
         <li class="nav-item"><a routerLink="/admin/services" routerLinkActive="active" class="nav-link">Admin</a></li>
+        <li class="nav-item"><a routerLink="/admin/requests" routerLinkActive="active" class="nav-link">Solicitudes</a></li>
       </ul>
       <div class="d-flex">
         <a *ngIf="!(auth.loggedIn$ | async)" class="btn btn-outline-primary" routerLink="/login">Iniciar sesión</a>

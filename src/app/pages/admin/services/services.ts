@@ -18,13 +18,20 @@ import { Service } from '../../../core/models/service';
 <table class="table align-middle">
   <thead>
     <tr>
-      <th>Nombre</th><th>Categoría</th><th>Estado</th><th></th>
+      <th>Nombre</th>
+      <th>Categoría</th>
+      <th>Nivel</th>
+      <th>Tipo</th>
+      <th>Estado</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let s of list()">
       <td>{{s.nombre}}</td>
       <td>{{s.categoria}}</td>
+      <td>{{s.nivel}}</td>
+      <td>{{s.tipoSolicitud || '—'}}</td>
       <td>
         <span class="badge" [class.text-bg-success]="s.estado==='Activo'" [class.text-bg-secondary]="s.estado==='Inactivo'">{{s.estado}}</span>
       </td>
@@ -65,6 +72,15 @@ import { Service } from '../../../core/models/service';
             <select class="form-select" [(ngModel)]="form.estado" name="estado" required>
               <option>Activo</option><option>Inactivo</option>
             </select></div>
+      <div class="col-md-6"><label class="form-label">Horario</label>
+        <input class="form-control" [(ngModel)]="form.horario" name="horario" placeholder="Ej. L-V 8:00-17:00"></div>
+      <div class="col-md-6"><label class="form-label">Tipo de solicitud</label>
+        <select class="form-select" [(ngModel)]="form.tipoSolicitud" name="tipoSolicitud">
+          <option value="">(No especificado)</option>
+          <option value="I">Incidente</option>
+          <option value="R">Requerimiento</option>
+          <option value="R/I">Ambos</option>
+        </select></div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-primary">Guardar</button>
@@ -79,7 +95,7 @@ export class Services {
   list = signal<Service[]>([]);
   editing = signal<Service | null>(null);
 
-  form: Service = { id: 0, nombre: '', categoria: '', nivel: 'Bronce', responsable: '', descripcion: '', estado: 'Activo', ans: '' };
+  form: Service = { id: 0, nombre: '', categoria: '', nivel: 'Bronce', responsable: '', descripcion: '', estado: 'Activo', ans: '', horario: '', tipoSolicitud: undefined };
 
   constructor(private ds: ServicesData) {
     ds.list$.subscribe(this.list.set);
@@ -87,7 +103,7 @@ export class Services {
 
   new() {
     this.editing.set(null);
-    this.form = { id: Date.now(), nombre: '', categoria: '', nivel: 'Bronce', responsable: '', descripcion: '', estado: 'Activo', ans: '' };
+    this.form = { id: Date.now(), nombre: '', categoria: '', nivel: 'Bronce', responsable: '', descripcion: '', estado: 'Activo', ans: '', horario: '', tipoSolicitud: undefined };
   }
   edit(s: Service) {
     this.editing.set(s);

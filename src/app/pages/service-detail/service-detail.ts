@@ -4,6 +4,7 @@ import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServicesData } from '../../core/services/services-data';
 import { Service } from '../../core/models/service';
+import { RequestsData } from '../../core/services/requests-data';
 
 @Component({
   standalone: true,
@@ -21,6 +22,8 @@ import { Service } from '../../core/models/service';
   <p class="text-muted">{{svc()!.categoria}} • {{svc()!.nivel}} • {{svc()!.responsable}}</p>
   <p>{{svc()!.descripcion}}</p>
   <p *ngIf="svc()!.ans"><strong>ANS:</strong> {{svc()!.ans}}</p>
+  <p *ngIf="svc()!.horario"><strong>Horario:</strong> {{svc()!.horario}}</p>
+  <p *ngIf="svc()!.tipoSolicitud"><strong>Tipo de solicitudes:</strong> {{svc()!.tipoSolicitud}}</p>
 
   <hr>
   <h2 class="h5 mb-3">Solicitar este servicio</h2>
@@ -51,7 +54,7 @@ export class ServiceDetail {
   svc = signal<Service | undefined>(undefined);
   form = { nombre: '', email: '', descripcion: '' };
 
-  constructor(route: ActivatedRoute, ds: ServicesData) {
+  constructor(route: ActivatedRoute, ds: ServicesData, private requests: RequestsData) {
     effect(() => {
       const id = Number(route.snapshot.paramMap.get('id'));
       ds.getById(id).subscribe(v => this.svc.set(v));
@@ -59,7 +62,12 @@ export class ServiceDetail {
   }
 
   submit() {
-    alert('Solicitud enviada (mock).');
+    const current = this.svc();
+    if (!current) return;
+    // Persist the request locally using RequestsData. This can later
+    // be replaced with an HTTP call to an API.
+    this.requests.create(this.form.nombre, this.form.email, this.form.descripcion, current.id);
+    alert('Solicitud enviada, pronto será atendida.');
     this.form = { nombre: '', email: '', descripcion: '' };
   }
 }

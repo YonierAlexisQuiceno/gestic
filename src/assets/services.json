@@ -5,9 +5,11 @@
     "categoria": "Soporte",
     "nivel": "Plata",
     "responsable": "TI",
-    "descripcion": "Atención de incidencias y requerimientos básicos.",
+    "descripcion": "Atención de incidencias y requerimientos básicos de tecnología de la información, incluyendo soporte a equipos y software estándar.",
     "ans": "Respuesta 4h, resolución 24h",
-    "estado": "Activo"
+    "estado": "Activo",
+    "horario": "Lunes a Viernes 8:00-17:00",
+    "tipoSolicitud": "R/I"
   },
   {
     "id": 2,
@@ -15,8 +17,46 @@
     "categoria": "Identidad",
     "nivel": "Bronce",
     "responsable": "Seguridad",
-    "descripcion": "Altas, bajas y cambios de usuarios.",
+    "descripcion": "Altas, bajas y modificaciones de usuarios y permisos en los sistemas corporativos.",
     "ans": "48h",
-    "estado": "Activo"
+    "estado": "Activo",
+    "horario": "Lunes a Viernes 8:00-18:00",
+    "tipoSolicitud": "R"
+  },
+  {
+    "id": 3,
+    "nombre": "Correo electrónico institucional",
+    "categoria": "Ofimática",
+    "nivel": "Oro",
+    "responsable": "Infraestructura",
+    "descripcion": "Provisión y mantenimiento de cuentas de correo electrónico para empleados, incluyendo acceso web y desde dispositivos móviles.",
+    "ans": "Respuesta 2h, resolución 6h",
+    "estado": "Activo",
+    "horario": "24/7",
+    "tipoSolicitud": "I"
+  },
+  {
+    "id": 4,
+    "nombre": "Sistema de videoconferencia",
+    "categoria": "Ofimática",
+    "nivel": "Plata",
+    "responsable": "TI",
+    "descripcion": "Soporte y gestión para herramientas de videoconferencia y colaboración en línea.",
+    "ans": "Respuesta 4h, resolución 12h",
+    "estado": "Activo",
+    "horario": "Lunes a Viernes 8:00-18:00",
+    "tipoSolicitud": "R/I"
+  },
+  {
+    "id": 5,
+    "nombre": "Gestión de dispositivos",
+    "categoria": "Infraestructura",
+    "nivel": "Bronce",
+    "responsable": "Infraestructura",
+    "descripcion": "Administración del ciclo de vida de los equipos de cómputo, desde la adquisición hasta la baja definitiva.",
+    "ans": "Reparación 7 días",
+    "estado": "Activo",
+    "horario": "Lunes a Viernes 8:00-17:00",
+    "tipoSolicitud": "I"
   }
 ]
