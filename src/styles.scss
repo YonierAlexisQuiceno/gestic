@@ -1,1 +1,48 @@
-/* You can add global styles to this file, and also import other style files */
+/*
+  Estilos globales
+  =================
+
+  Este archivo contiene reglas que se aplican a todo el sitio. Se
+  establecen colores de fondo suaves, una tipografía legible y
+  algunas utilidades para mejorar la apariencia general del
+  catálogo. Bootstrap sigue siendo la base de los componentes,
+  pero estas reglas personalizan la paleta de colores para darle
+  una identidad más neutra y moderna.
+*/
+
+body {
+  background-color: #f7f9fc;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+h1, h2, h3, h4, h5 {
+  font-weight: 600;
+  color: #273746;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Tarjetas de servicios */
+.card {
+  border: 1px solid #e1e5ec;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  color: #1f4e79;
+}
+
+/* Modifica la tabla de administración para alternar colores y
+   resaltar el hover */
+table.table tr:nth-child(even) {
+  background-color: #f2f6fa;
+}
+
+table.table tbody tr:hover {
+  background-color: #e9f1fb;
+}

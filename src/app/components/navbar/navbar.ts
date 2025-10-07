@@ -8,7 +8,7 @@ import { Auth } from '../../core/services/auth';
   standalone: true,
   imports: [RouterLink, RouterLinkActive, NgIf, AsyncPipe],
   template: `
-<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <div class="container">
     <a class="navbar-brand" routerLink="/">GESTIC</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">

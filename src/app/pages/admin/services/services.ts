@@ -15,7 +15,7 @@ import { Service } from '../../../core/models/service';
 </div>
 
 <div class="table-responsive">
-<table class="table align-middle">
+<table class="table table-striped table-hover align-middle">
   <thead>
     <tr>
       <th>Nombre</th>
