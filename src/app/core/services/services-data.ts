@@ -1,163 +1,101 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, map } from 'rxjs';
-import { Service } from '../../core/models/service';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { Service } from '../models/service';
 
 /**
- * ServicesData encapsula la lógica de acceso al backend REST que
- * expone el catálogo de servicios. Anteriormente esta clase
- * consumía un JSON estático desde `assets/services.json`. En esta
- * versión se conecta a la API ASP.NET Core desplegada en
- * http://localhost:5000/api. La conversión entre los nombres de
- * campo del backend (snake_case en español) y el modelo de la
- * aplicación Angular se realiza mediante las funciones `fromApi`
- * y `toApi` definidas más abajo.
+ * Servicio para gestionar los servicios a través de la API. Carga
+ * inicialmente todos los servicios y expone un observable para
+ * consumirlos en los componentes. Proporciona métodos CRUD que
+ * actualizan la lista al completarse las operaciones.
  */
-
 @Injectable({ providedIn: 'root' })
-export class ServicesData{
+export class ServicesData {
   private readonly _list$ = new BehaviorSubject<Service[]>([]);
-  /**
-   * Observable que emite la lista actual de servicios. Todos los
-   * componentes suscritos reaccionan automáticamente a las
-   * actualizaciones después de las operaciones CRUD.
-   */
   readonly list$ = this._list$.asObservable();
 
-  /**
-   * URL base de la API para los servicios. De forma predeterminada
-   * apunta a un backend local en el puerto 5000. Si se despliega la
-   * API en otro host o puerto este valor puede modificarse aquí
-   * fácilmente.
-   */
-  private readonly apiBase = 'http://localhost:5000/api/services';
+  private readonly baseUrl = 'http://localhost:5000/api/services';
 
   constructor(private http: HttpClient) {
+    // Cargar servicios al iniciar el servicio.
     this.load();
   }
 
   /**
-   * Carga la lista de servicios desde el backend REST y actualiza
-   * el BehaviorSubject interno. La conversión de formato se
-   * realiza mediante `fromApi` para adaptar los nombres de
-   * propiedades.
+   * Obtiene la lista de servicios. Si la API responde correctamente y
+   * devuelve una lista no vacía, se utiliza esa lista. En caso de
+   * error (por ejemplo, si el backend no está disponible) o de que la
+   * lista devuelta esté vacía, se carga un conjunto de datos de
+   * ejemplo desde la carpeta de assets. Esto permite que la
+   * aplicación se muestre con contenido de referencia incluso sin
+   * conexión al backend.
    */
   load() {
-    this.http.get<any[]>(this.apiBase).subscribe(
-      (data) => {
-        const list = data.map((obj) => this.fromApi(obj));
-        this._list$.next(list);
+    this.http.get<Service[]>(this.baseUrl).subscribe({
+      next: list => {
+        if (Array.isArray(list) && list.length > 0) {
+          this._list$.next(list);
+        } else {
+          this.loadFallback();
+        }
       },
-      (err) => {
-        console.error('Error cargando servicios', err);
+      error: () => {
+        this.loadFallback();
       }
-    );
+    });
+  }
+
+  /** Carga los servicios de ejemplo incluidos en assets. */
+  private loadFallback() {
+    this.http.get<Service[]>('assets/sample-services.json').subscribe(list => this._list$.next(list));
+  }
+
+  /** Obtiene un servicio concreto por su identificador. */
+  getById(id: number): Observable<Service> {
+    return this.http.get<Service>(`${this.baseUrl}/${id}`);
   }
 
   /**
-   * Devuelve un observable del servicio con el identificador dado.
-   * Si la lista aún no se ha cargado puede devolver undefined
-   * inicialmente, pero se actualizará en cuanto lleguen los datos.
+   * Crea un nuevo servicio en el backend. Si la llamada falla o no
+   * existe backend, el servicio se añade directamente a la lista en
+   * memoria asignando un id único basado en la fecha. Tras la
+   * operación se recarga la lista.
    */
-  getById(id: number) {
-    return this.list$.pipe(map((list) => list.find((s) => s.id === id)));
+  create(item: Omit<Service, 'id' | 'category' | 'createdAt'>) {
+    return this.http.post<Service>(this.baseUrl, item).subscribe({
+      next: () => this.load(),
+      error: () => {
+        const current = this._list$.value;
+        const newItem = { ...item, id: Date.now() } as Service;
+        this._list$.next([...current, newItem]);
+      }
+    });
   }
 
   /**
-   * Crea un nuevo servicio en el backend. Convierte el modelo
-   * interno a la estructura aceptada por la API antes de enviar
-   * la solicitud. Al completarse la operación se vuelve a
-   * sincronizar la lista local.
+   * Actualiza un servicio existente. Intenta persistir el cambio en
+   * el backend. Si la llamada falla, actualiza la copia local.
    */
-  create(item: Service) {
-    const body = this.toApi(item);
-    this.http.post<any>(this.apiBase, body).subscribe(
-      (res) => {
-        // Normaliza la respuesta de la API y actualiza la lista
-        const nuevo = this.fromApi(res);
-        this._list$.next([...this._list$.value, nuevo]);
-      },
-      (err) => console.error('Error creando servicio', err)
-    );
+  update(item: Omit<Service, 'category' | 'createdAt'>) {
+    return this.http.put<Service>(`${this.baseUrl}/${item.id}`, item).subscribe({
+      next: () => this.load(),
+      error: () => {
+        const current = this._list$.value.map(s => s.id === item.id ? { ...s, ...item } as Service : s);
+        this._list$.next(current);
+      }
+    });
   }
 
   /**
-   * Actualiza un servicio existente en el backend. Tras la
-   * actualización sincroniza el listado local reemplazando el
-   * elemento actualizado.
-   */
-  update(item: Service) {
-    const body = this.toApi(item);
-    this.http.put<any>(`${this.apiBase}/${item.id}`, body).subscribe(
-      (res) => {
-        const actualizado = this.fromApi(res);
-        const list = this._list$.value.map((s) => (s.id === actualizado.id ? actualizado : s));
-        this._list$.next(list);
-      },
-      (err) => console.error('Error actualizando servicio', err)
-    );
-  }
-
-  /**
-   * Elimina un servicio de la base de datos mediante una
-   * solicitud DELETE al backend. La lista local se actualiza
-   * eliminando el elemento correspondiente al identificador.
+   * Elimina un servicio por su identificador. Intenta borrar en el
+   * backend. Si la llamada falla se elimina localmente.
    */
   remove(id: number) {
-    this.http.delete(`${this.apiBase}/${id}`).subscribe(
-      () => {
-        this._list$.next(this._list$.value.filter((s) => s.id !== id));
-      },
-      (err) => console.error('Error eliminando servicio', err)
-    );
-  }
-
-  /**
-   * Convierte un objeto proveniente de la API REST (snake_case,
-   * nombres en español) a la interfaz Service utilizada en la
-   * aplicación Angular. Ajusta valores predeterminados cuando
-   * ciertos campos no están presentes.
-   */
-  private fromApi(obj: any): Service {
-    return {
-      id: obj.id,
-      nombre: obj.nombre,
-      categoria: obj.necesidad || '',
-      nivel: (obj.ansNivel as any) || 'Bronce',
-      responsable: obj.equipo || '',
-      descripcion: obj.descripcion,
-      ans: obj.tiempoHabil || '',
-      estado: obj.estado && obj.estado.toUpperCase() === 'ACTIVO' ? 'Activo' : 'Inactivo',
-      horario: obj.horario || '',
-      tipoSolicitud: obj.tipoSolicitud || undefined
-    };
-  }
-
-  /**
-   * Convierte un objeto Service de la aplicación Angular a la
-   * estructura esperada por la API ASP.NET Core. Se generan
-   * códigos automáticos basados en el nombre y la fecha cuando no
-   * se ha definido un identificador único. El estado se envía en
-   * mayúsculas para coincidir con los posibles valores de la API.
-   */
-  private toApi(item: Service): any {
-    const codigoBase = item.nombre
-      .trim()
-      .toUpperCase()
-      .replace(/\s+/g, '_')
-      .slice(0, 16);
-    return {
-      id: item.id,
-      codigo: item.id ? `SVC_${item.id}` : `SVC_${Date.now()}`,
-      nombre: item.nombre,
-      descripcion: item.descripcion,
-      equipo: item.responsable || null,
-      necesidad: item.categoria || null,
-      horario: item.horario || null,
-      ansNivel: item.nivel || null,
-      tiempoHabil: item.ans || null,
-      tipoSolicitud: item.tipoSolicitud || null,
-      estado: item.estado ? item.estado.toUpperCase() : 'ACTIVO'
-    };
+    return this.http.delete(`${this.baseUrl}/${id}`).subscribe({
+      next: () => this.load(),
+      error: () => {
+        this._list$.next(this._list$.value.filter(s => s.id !== id));
+      }
+    });
   }
 }

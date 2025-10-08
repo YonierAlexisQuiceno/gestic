@@ -3,6 +3,7 @@ import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { RequestsData } from '../../../core/services/requests-data';
 import { ServicesData } from '../../../core/services/services-data';
 import { combineLatest, map } from 'rxjs';
+import { RequestStatus } from '../../../core/models/request';
 
 /**
  * Administrative view to list and manage incoming service requests. This
@@ -24,19 +25,27 @@ import { combineLatest, map } from 'rxjs';
       <tr>
         <th>ID</th>
         <th>Fecha</th>
-        <th>Solicitante</th>
+        <th>Estado</th>
         <th>Servicio</th>
-        <th>Descripción</th>
+        <th>Detalles</th>
         <th></th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let r of list()">
         <td>{{r.id}}</td>
-        <td>{{r.createdAt | date:'short'}}</td>
-        <td>{{r.nombre}}<br><small class="text-muted">{{r.email}}</small></td>
+        <td>{{r.requestDate | date:'short'}}</td>
+        <td>
+          <span class="badge"
+            [class.text-bg-secondary]="r.status === 'PENDIENTE'"
+            [class.text-bg-warning]="r.status === 'EN_PROCESO'"
+            [class.text-bg-success]="r.status === 'COMPLETADA'"
+            [class.text-bg-danger]="r.status === 'CANCELADA'">
+            {{r.status}}
+          </span>
+        </td>
         <td>{{r.serviceName}}</td>
-        <td>{{r.descripcion}}</td>
+        <td>{{r.details}}</td>
         <td class="text-end">
           <button class="btn btn-sm btn-outline-danger" (click)="remove(r.id)">Eliminar</button>
         </td>
@@ -50,30 +59,37 @@ import { combineLatest, map } from 'rxjs';
   `
 })
 export class RequestsAdmin {
-  // We maintain our own list combining requests with service names
+  // Mantenemos nuestra propia lista combinando solicitudes con el
+  // nombre del servicio. Incluimos el estado para mostrarlo con
+  // distintivos de color.
   list = signal<{
     id: number;
-    nombre: string;
-    email: string;
-    descripcion: string;
-    serviceId: number;
-    createdAt: Date;
+    requestDate: string;
+    status: RequestStatus;
     serviceName: string;
+    details: string;
   }[]>([]);
 
   constructor(private requests: RequestsData, services: ServicesData) {
-    // Combine the list of requests and services to enrich each
-    // request with its service name. Whenever either stream
-    // emits, the computed list updates accordingly.
+    // Combinar las solicitudes con los servicios para enriquecer cada
+    // solicitud con el nombre del servicio. Si la API devuelve el
+    // objeto service embebido se utiliza, en caso contrario se
+    // localiza por id.
     combineLatest([
       this.requests.list$,
       services.list$
     ]).pipe(
       map(([reqs, servicesList]) =>
-        reqs.map(r => ({
-          ...r,
-          serviceName: servicesList.find(s => s.id === r.serviceId)?.nombre || '—'
-        }))
+        reqs.map(r => {
+          const svcName = r.service?.name ?? servicesList.find(s => s.id === r.serviceId)?.name ?? '—';
+          return {
+            id: r.id,
+            requestDate: r.requestDate,
+            status: r.status,
+            serviceName: svcName,
+            details: r.details
+          };
+        })
       )
     ).subscribe(this.list.set);
   }

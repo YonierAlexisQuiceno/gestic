@@ -1,2 +1,0 @@
-import './polyfills.server.mjs';
-import{K as a,g as r}from"./chunk-YEAFJI64.mjs";var i=class e{_loggedIn$=new r(!1);loggedIn$=this._loggedIn$.asObservable();login(t,o){let n=!!t&&!!o;return this._loggedIn$.next(n),n}logout(){this._loggedIn$.next(!1)}get isLoggedIn(){return this._loggedIn$.value}static \u0275fac=function(o){return new(o||e)};static \u0275prov=a({token:e,factory:e.\u0275fac,providedIn:"root"})};export{i as a};

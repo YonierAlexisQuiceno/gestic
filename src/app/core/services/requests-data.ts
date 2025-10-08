@@ -1,101 +1,74 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { Request } from '../models/request';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject } from 'rxjs';
+import { Request, RequestStatus } from '../models/request';
 
 /**
- * A lightweight in-memory store for service requests. The
- * `BehaviorSubject` makes it easy to subscribe to changes and
- * populate lists in the admin interface. When backend support is
- * introduced, this service can be refactored to perform HTTP
- * requests against an API while maintaining a consistent API
- * surface.
+ * Servicio para gestionar las solicitudes de servicios. Sustituye el
+ * almacenamiento en memoria por llamadas al backend y mantiene un
+ * `BehaviorSubject` para reaccionar a cambios en la lista.
  */
 @Injectable({ providedIn: 'root' })
 export class RequestsData {
   private readonly _list$ = new BehaviorSubject<Request[]>([]);
-  /**
-   * Observable que emite la lista de solicitudes vigentes. Los
-   * componentes administrativos pueden suscribirse para
-   * sincronizar su interfaz en tiempo real.
-   */
   readonly list$ = this._list$.asObservable();
 
-  /**
-   * URL base de la API para las solicitudes. Ajusta este valor si
-   * el backend se encuentra en otra ruta o puerto.
-   */
-  private readonly apiBase = 'http://localhost:5000/api/solicitudes';
+  private readonly baseUrl = 'http://localhost:5000/api/requests';
 
   constructor(private http: HttpClient) {
     this.load();
   }
 
-  /**
-   * Carga todas las solicitudes desde el backend y actualiza la lista
-   * local. Si ocurre un error se mantendrá la lista actual y se
-   * imprimirá en consola para depuración.
-   */
+  /** Carga todas las solicitudes desde la API. Si el backend no está
+   * disponible, se inicializa una lista vacía. */
   load() {
-    this.http.get<any[]>(this.apiBase).subscribe(
-      (data) => {
-        const list = data.map((obj) => this.fromApi(obj));
-        this._list$.next(list);
-      },
-      (err) => console.error('Error cargando solicitudes', err)
-    );
+    this.http.get<Request[]>(this.baseUrl).subscribe({
+      next: list => this._list$.next(list),
+      error: () => {
+        // si no hay backend cargamos una lista vacía para empezar
+        this._list$.next([]);
+      }
+    });
   }
 
   /**
-   * Crea una nueva solicitud asociada a un servicio. Envia la
-   * información al backend y, al completar, agrega la nueva
-   * solicitud a la lista local. Retorna una promesa que resuelve
-   * con la solicitud normalizada para permitir un manejo
-   * asíncrono desde los componentes.
+   * Registra una nueva solicitud. Por simplicidad asignamos un
+   * usuario fijo (1) y estado inicial PENDIENTE. La fecha la
+   * establece el backend.
    */
-  create(nombre: string, email: string, descripcion: string, serviceId: number) {
-    const body = {
-      servicioId: serviceId,
-      nombre,
-      email,
-      descripcion,
-      estado: 'pendiente'
+  create(details: string, serviceId: number) {
+    const payload = {
+      userId: 1,
+      serviceId,
+      details,
+      status: 'PENDIENTE' as RequestStatus
     };
-    return this.http.post<any>(this.apiBase, body).subscribe(
-      (res) => {
-        const req = this.fromApi(res);
-        this._list$.next([...this._list$.value, req]);
-      },
-      (err) => console.error('Error creando solicitud', err)
-    );
+    this.http.post<Request>(this.baseUrl, payload).subscribe({
+      next: () => this.load(),
+      error: () => {
+        // crear solicitud localmente cuando no hay backend
+        const id = Date.now();
+        const now = new Date().toISOString();
+        const newItem: Request = {
+          id,
+          userId: payload.userId,
+          serviceId: payload.serviceId,
+          requestDate: now,
+          status: payload.status,
+          details: payload.details
+        };
+        this._list$.next([...this._list$.value, newItem]);
+      }
+    });
   }
 
-  /**
-   * Elimina una solicitud del backend y de la lista local. Si la
-   * operación falla se notifica por consola.
-   */
+  /** Elimina una solicitud por su identificador. */
   remove(id: number) {
-    this.http.delete(`${this.apiBase}/${id}`).subscribe(
-      () => {
-        this._list$.next(this._list$.value.filter((r) => r.id !== id));
-      },
-      (err) => console.error('Error eliminando solicitud', err)
-    );
-  }
-
-  /**
-   * Convierte un objeto recibido del backend a la interfaz
-   * Request utilizada en la aplicación. La API usa nombres
-   * servicioId y createdAt, se normalizan a serviceId y Date.
-   */
-  private fromApi(obj: any): Request {
-    return {
-      id: obj.id,
-      nombre: obj.nombre,
-      email: obj.email,
-      descripcion: obj.descripcion,
-      serviceId: obj.servicioId,
-      createdAt: obj.createdAt ? new Date(obj.createdAt) : new Date()
-    };
+    this.http.delete(`${this.baseUrl}/${id}`).subscribe({
+      next: () => this.load(),
+      error: () => {
+        this._list$.next(this._list$.value.filter(r => r.id !== id));
+      }
+    });
   }
 }

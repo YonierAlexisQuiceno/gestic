@@ -1,2 +1,0 @@
-import './polyfills.server.mjs';
-import{K as n,g as s}from"./chunk-YEAFJI64.mjs";var o=class r{_list$=new s([]);list$=this._list$.asObservable();create(e,t,a,l){let i={id:Date.now(),nombre:e,email:t,descripcion:a,serviceId:l,createdAt:new Date};return this._list$.next([...this._list$.value,i]),i}remove(e){this._list$.next(this._list$.value.filter(t=>t.id!==e))}static \u0275fac=function(t){return new(t||r)};static \u0275prov=n({token:r,factory:r.\u0275fac,providedIn:"root"})};export{o as a};

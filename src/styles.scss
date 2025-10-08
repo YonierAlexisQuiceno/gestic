@@ -1,48 +1,89 @@
-/*
-  Estilos globales
-  =================
+/* Importar la fuente Open Sans desde Google. Esta fuente es
+ * recomendada en el manual de identidad de la IES CINOC como
+ * tipografía secundaria para contenidos web【204630901375654†L923-L997】. */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
 
-  Este archivo contiene reglas que se aplican a todo el sitio. Se
-  establecen colores de fondo suaves, una tipografía legible y
-  algunas utilidades para mejorar la apariencia general del
-  catálogo. Bootstrap sigue siendo la base de los componentes,
-  pero estas reglas personalizan la paleta de colores para darle
-  una identidad más neutra y moderna.
-*/
+/* Variables globales basadas en la paleta de colores del manual de
+ * identidad de la IES CINOC. El color principal es el Amarillo
+ * Naranja (#FAA528) y el secundario el Azul Oscuro (#143C6A). Se
+ * incluye también el Rojo Terracota (#D44D15) como color de
+ * atención【204630901375654†L1016-L1040】. */
+:root {
+  --primary-color: #FAA528; /* Amarillo Naranja principal */
+  --secondary-color: #143C6A; /* Azul Oscuro de acompañamiento */
+  --accent-color: #D44D15; /* Rojo Terracota para estados de alarma */
+  --background-color: #f6f8fa;
+  --card-background: #ffffff;
+  --text-color: #333333;
+  --font-family: 'Open Sans', sans-serif;
+}
 
+/* Estilo global de cuerpo */
 body {
-  background-color: #f7f9fc;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
 }
 
-h1, h2, h3, h4, h5 {
-  font-weight: 600;
-  color: #273746;
+/* Navbar personalizado. Se elimina el color por defecto de
+ * Bootstrap y se utiliza el color secundario de la institución. */
+.navbar {
+  background-color: var(--secondary-color);
+  border-bottom: 3px solid var(--primary-color);
+}
+.navbar .navbar-brand,
+.navbar .nav-link {
+  color: #fff;
+}
+.navbar .nav-link.active {
+  text-decoration: underline;
+}
+.navbar .btn-outline-light {
+  color: #fff;
+  border-color: #fff;
+}
+.navbar .btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
-.navbar-brand {
-  font-weight: 700;
-  letter-spacing: 0.5px;
+/* Botones primarios con el color principal */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+// Versión ligeramente más oscura para el efecto hover. Al no poder
+// utilizar funciones de Sass en este entorno, se codifica el color
+// manualmente aproximando un 5 % más oscuro que el principal.
+.btn-primary:hover {
+  background-color: #e89c1e;
+  border-color: #e89c1e;
 }
 
-/* Tarjetas de servicios */
+/* Tarjetas: sombra sutil y bordes redondeados */
 .card {
-  border: 1px solid #e1e5ec;
+  border: 1px solid #e0e0e0;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: var(--card-background);
 }
-
 .card-title {
-  color: #1f4e79;
+  color: var(--secondary-color);
 }
 
-/* Modifica la tabla de administración para alternar colores y
-   resaltar el hover */
-table.table tr:nth-child(even) {
-  background-color: #f2f6fa;
+/* Badges personalizados según estado */
+.badge.text-bg-success {
+  background-color: #19A576;
+  color: #fff;
 }
-
-table.table tbody tr:hover {
-  background-color: #e9f1fb;
+.badge.text-bg-warning {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+.badge.text-bg-secondary {
+  background-color: #6c757d;
+  color: #fff;
+}
+.badge.text-bg-danger {
+  background-color: var(--accent-color);
+  color: #fff;
 }

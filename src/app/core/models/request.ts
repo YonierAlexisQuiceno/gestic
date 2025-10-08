@@ -1,20 +1,30 @@
+import { Service } from './service';
+
+// Enumeración de posibles estados para una solicitud. Estos valores
+// reflejan el flujo natural de una petición: desde su creación
+// (PENDIENTE), pasando por el procesamiento (EN_PROCESO), hasta su
+// resolución (COMPLETADA) o cancelación (CANCELADA).
+export type RequestStatus = 'PENDIENTE' | 'EN_PROCESO' | 'COMPLETADA' | 'CANCELADA';
+
 /**
- * Representa una solicitud de servicio enviada a través del
- * catálogo. En esta fase de prueba de concepto las solicitudes se
- * mantienen únicamente en memoria, pero la estructura está lista
- * para persistirse en un backend cuando se implemente.
+ * Modelo que representa una solicitud de servicio realizada por un
+ * usuario. Incluye la fecha de solicitud y el estado actual. El
+ * backend devolverá además el objeto de servicio solicitado y,
+ * eventualmente, el usuario solicitante.
  */
 export interface Request {
-  /** Identificador único generado en el cliente. */
+  /** Identificador único de la solicitud. */
   id: number;
-  /** Nombre de la persona que solicita el servicio. */
-  nombre: string;
-  /** Correo electrónico de contacto. */
-  email: string;
-  /** Descripción detallada del requerimiento o incidencia. */
-  descripcion: string;
+  /** Identificador del usuario que realiza la solicitud. */
+  userId: number;
   /** Identificador del servicio solicitado. */
   serviceId: number;
-  /** Fecha de creación de la solicitud. */
-  createdAt: Date;
+  /** Fecha en la que se crea la solicitud (cadena ISO 8601). */
+  requestDate: string;
+  /** Estado actual de la solicitud. */
+  status: RequestStatus;
+  /** Descripción o detalles de la solicitud. */
+  details: string;
+  /** Objeto del servicio asociado (opcional, devuelto por la API). */
+  service?: Service;
 }

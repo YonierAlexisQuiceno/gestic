@@ -1,61 +1,37 @@
-// Define the supported service levels. These follow the typical
-// “bronce/plata/oro” segmentation used in service catalogues. Feel
-// free to extend these values if your organisation uses other
-// tiers. Changing this type will propagate into forms and lists
-// automatically via TypeScript type checking.
-export type ServiceLevel = 'Bronce' | 'Plata' | 'Oro';
+import { Category } from './category';
 
-// Define the possible states a service can be in. “Activo”
-// indicates a service currently offered to the community; “Inactivo”
-// identifies services that have been retired or are not available
-// for new requests. Additional states (e.g. “Planificado”) can be
-// added to support future functionality.
-export type ServiceStatus = 'Activo' | 'Inactivo';
-
-// Enumerate the types of requests that a service can accept. These
-// codes align with the ITIL distinction between Incidencias (I),
-// Requerimientos (R) o ambos (R/I). Using single-letter codes
-// makes it easy to display in tables while still being explicit.
-export type ServiceRequestType = 'I' | 'R' | 'R/I';
+// Enumeración para representar el estado de un servicio en el catálogo.
+// Los valores coinciden con los estados definidos en la base de datos
+// (ACTIVO, RETIRADO, PLANIFICADO)【204630901375654†L1058-L1073】. Utilizar un
+// tipo de unión en lugar de una cadena libre ayuda a prevenir
+// errores tipográficos y facilita el filtrado en la UI.
+export type ServiceStatus = 'ACTIVO' | 'RETIRADO' | 'PLANIFICADO';
 
 /**
- * The core data model for a service within the Gestic application.
- *
- * This interface extends the original fields with optional
- * attributes for the service’s support schedule (horario) and the
- * types of solicitudes (incidente, requerimiento) it accepts. The
- * ANS field remains optional to allow administrators to omit it
- * initially and add it later.
+ * Representa un servicio ofrecido por la OTIC. Cada servicio
+ * pertenece a una categoría y tiene asociado un acuerdo de nivel de
+ * servicio (SLA). El backend devuelve la relación con la categoría
+ * para permitir mostrar el nombre de la categoría sin una segunda
+ * llamada【204630901375654†L1016-L1040】.
  */
 export interface Service {
-  /**
-   * Unique identifier for the service. In the absence of a backend
-   * database this is a simple numeric value generated on the client
-   * side (e.g. using Date.now()). When a backend is introduced
-   * this would become an auto‐incrementing primary key.
-   */
+  /** Identificador único del servicio. */
   id: number;
-  /** Human readable name of the service. */
-  nombre: string;
-  /** Category under which the service is grouped (e.g. “Soporte”, “Infraestructura”). */
-  categoria: string;
-  /** Service level – determines the ANS target and price tier. */
-  nivel: ServiceLevel;
-  /** Area or team responsible for delivering the service. */
-  responsable: string;
-  /** Detailed description outlining the scope of the service. */
-  descripcion: string;
-  /** Optional agreed service level (e.g. response time or resolution time). */
-  ans?: string;
-  /** Current availability status of the service. */
-  estado: ServiceStatus;
-  /** Optional schedule indicating the hours during which the service is available. */
-  horario?: string;
-  /**
-   * Optional request type(s) accepted for this service. “I” for
-   * Incidente, “R” for Requerimiento, or “R/I” when both are
-   * accepted. When undefined the type will not be displayed in
-   * the lists.
-   */
-  tipoSolicitud?: ServiceRequestType;
+  /** Nombre del servicio (por ejemplo, "Correo Institucional"). */
+  name: string;
+  /** Descripción detallada del servicio. */
+  description: string;
+  /** Identificador de la categoría a la que pertenece el servicio. */
+  categoryId: number;
+  /** Objeto de la categoría asociado (proporcionado por la API). */
+  category?: Category;
+  /** Acuerdo de nivel de servicio (SLA) que define tiempos de
+   * respuesta o resolución. */
+  sla: string;
+  /** Estado actual del servicio: ACTIVO, RETIRADO o PLANIFICADO. */
+  status: ServiceStatus;
+  /** Identificador del usuario que creó el servicio (opcional). */
+  createdBy?: number;
+  /** Fecha de creación del servicio (opcional, ISO 8601). */
+  createdAt?: string;
 }
