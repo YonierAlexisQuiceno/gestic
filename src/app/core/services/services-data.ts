@@ -14,7 +14,7 @@ export class ServicesData {
   private readonly _list$ = new BehaviorSubject<Service[]>([]);
   readonly list$ = this._list$.asObservable();
 
-  private readonly baseUrl = 'http://localhost:5000/api/services';
+  private readonly baseUrl = 'http://gestic-api-env.eba-jggdimrv.us-east-1.elasticbeanstalk.com/api/services';
 
   constructor(private http: HttpClient) {
     // Cargar servicios al iniciar el servicio.
