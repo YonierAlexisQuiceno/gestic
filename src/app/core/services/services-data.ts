@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Service } from '../models/service';
+import { environment } from '../../../environments/environment';
 
 /**
  * Servicio para gestionar los servicios a través de la API. Carga
@@ -14,7 +15,7 @@ export class ServicesData {
   private readonly _list$ = new BehaviorSubject<Service[]>([]);
   readonly list$ = this._list$.asObservable();
 
-  private readonly baseUrl = 'http://gestic-api-env.eba-jggdimrv.us-east-1.elasticbeanstalk.com/api/services';
+  private readonly baseUrl = environment.apiBaseUrl + '/services';
 
   constructor(private http: HttpClient) {
     // Cargar servicios al iniciar el servicio.
