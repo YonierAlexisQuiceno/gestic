@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { Request, RequestStatus } from '../models/request';
+import { environment } from '../../../environments/environment';
 
 /**
  * Servicio para gestionar las solicitudes de servicios. Sustituye el
@@ -13,7 +14,7 @@ export class RequestsData {
   private readonly _list$ = new BehaviorSubject<Request[]>([]);
   readonly list$ = this._list$.asObservable();
 
-  private readonly baseUrl = 'http://localhost:5000/api/requests';
+  private readonly baseUrl = environment.apiBaseUrl + '/requests';
 
   constructor(private http: HttpClient) {
     this.load();

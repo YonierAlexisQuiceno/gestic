@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { Category } from '../models/category';
+import { environment } from '../../../environments/environment';
 
 /**
  * Servicio encargado de cargar y exponer la lista de categorías
@@ -16,7 +17,7 @@ export class CategoriesData {
 
   // Dirección base de la API para categorías. Se podría extraer a
   // una configuración global si se repite en varios servicios.
-  private readonly baseUrl = 'http://localhost:5000/api/categories';
+  private readonly baseUrl = environment.apiBaseUrl + '/categories';
 
   constructor(private http: HttpClient) {
     this.load();
